@@ -9,6 +9,8 @@ package airportsimulation;
  * @author GoatKy1e
  */
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 public class AirportSimulation {
 
     /**
@@ -17,7 +19,14 @@ public class AirportSimulation {
     public static void main(String[] args) {
         System.out.println("-- APU Airport --\n");
 
-        ATC atc = new ATC();
+        // Atomic variables for statistics
+        AtomicReference<Double> maxWaitTime = new AtomicReference<>(0.0);
+        AtomicReference<Double> totalWaitTime = new AtomicReference<>(0.0);
+        AtomicReference<Double> minWaitTime = new AtomicReference<>(Double.MAX_VALUE);
+        AtomicInteger planesServed = new AtomicInteger(0);
+        AtomicInteger passengersBoarded = new AtomicInteger(0);
+
+        ATC atc = new ATC(maxWaitTime, totalWaitTime, minWaitTime, planesServed, passengersBoarded);
         Runway runway = new Runway();
         RefuelingTruck refuelingTruck = new RefuelingTruck();
         List<Thread> planeThreads = new ArrayList<>();
@@ -57,7 +66,19 @@ public class AirportSimulation {
             }
         }
         
-        atc.printStatistics();
+        // Print statistics from main method
+        printStatistics(maxWaitTime, totalWaitTime, minWaitTime, planesServed, passengersBoarded);
+    }
+
+    private static void printStatistics(AtomicReference<Double> maxWaitTime, AtomicReference<Double> totalWaitTime, AtomicReference<Double> minWaitTime, AtomicInteger planesServed, AtomicInteger passengersBoarded) {
+        System.out.println("Checking All Gates: All Empty");
+        double avgWaitTime = (double)totalWaitTime.get() / planesServed.get();
+        System.out.println("\n--- ATC Statistics ---");
+        System.out.println("Max Wait Time: " + String.format("%.2f", maxWaitTime.get()));
+        System.out.println("Avg Wait Time: " + String.format("%.2f", avgWaitTime));
+        System.out.println("Min Wait Time: " + (minWaitTime.get() == Double.MAX_VALUE ? "0.00" : String.format("%.2f", minWaitTime.get())));
+        System.out.println("Planes Served: " + planesServed.get());
+        System.out.println("Passengers Boarded: " + passengersBoarded.get());
     }
 }
     

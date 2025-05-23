@@ -9,6 +9,8 @@ package airportsimulation;
  * @author GoatKy1e
  */
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ATC {
     private final int NUM_GATES = 3;
@@ -19,13 +21,19 @@ public class ATC {
     private final Object coastingLock = new Object();
     private boolean isCoasting = false;
 
-    private double maxWaitTime = 0;
-    private double totalWaitTime = 0;
-    private double minWaitTime = Double.MAX_VALUE;
-    private int planesServed = 0;
-    private int passengersBoarded = 0;
+    private final AtomicReference<Double> maxWaitTime;
+    private final AtomicReference<Double> totalWaitTime;
+    private final AtomicReference<Double> minWaitTime;
+    private final AtomicInteger planesServed;
+    private final AtomicInteger passengersBoarded;
 
-    public ATC() {
+    public ATC(AtomicReference<Double> maxWaitTime, AtomicReference<Double> totalWaitTime, AtomicReference<Double> minWaitTime, AtomicInteger planesServed, AtomicInteger passengersBoarded) {
+        this.maxWaitTime = maxWaitTime;
+        this.totalWaitTime = totalWaitTime;
+        this.minWaitTime = minWaitTime;
+        this.planesServed = planesServed;
+        this.passengersBoarded = passengersBoarded;
+        
         for (int i = 0; i < NUM_GATES; i++) {
             gates[i] = new Gate(i + 1);
         }
@@ -112,29 +120,17 @@ public class ATC {
     }
 
     public void updateWaitTimes(double waitTime) {
-        synchronized (this) {
-            maxWaitTime = Math.max(maxWaitTime, waitTime);
-            minWaitTime = Math.min(minWaitTime, waitTime);
-            totalWaitTime += waitTime;
-            planesServed++;
-        }
+        maxWaitTime.updateAndGet(current -> Math.max(current, waitTime));
+        
+        minWaitTime.updateAndGet(current -> Math.min(current, waitTime));
+        
+        totalWaitTime.updateAndGet(current -> current + waitTime);
+        
+        planesServed.incrementAndGet();
     }
 
     public void addPassengersBoarded(int numPassengers) {
-        synchronized (this) {
-            passengersBoarded += numPassengers;
-        }
-    }
-
-    public void printStatistics() {
-        log("Checking All Gates: All Empty");
-        double avgWaitTime = (planesServed > 0) ? totalWaitTime / planesServed : 0;
-        System.out.println("\n--- ATC Statistics ---");
-        System.out.println("Max Wait Time: " + String.format("%.2f", maxWaitTime));
-        System.out.println("Avg Wait Time: " + String.format("%.2f", avgWaitTime));
-        System.out.println("Min Wait Time: " + (minWaitTime == Double.MAX_VALUE ? "0.00" : String.format("%.2f", minWaitTime)));
-        System.out.println("Planes Served: " + planesServed);
-        System.out.println("Passengers Boarded: " + passengersBoarded);
+        passengersBoarded.addAndGet(numPassengers);
     }
 
     public boolean checkGatesEmpty() {
