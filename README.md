@@ -50,17 +50,9 @@ Emergency aircraft receive priority queue positioning
 System checks for runway availability and gate assignment
 Landing clearance granted when resources are available
 
-2. Ground Operations
-
-┌─────────────────┬─────────────────┐
-│   Passenger     │    Aircraft     │
-│   Operations    │   Maintenance   │
-├─────────────────┼─────────────────┤
-│ • Disembark     │ • Refueling     │
-│ • Restocking    │   (7 seconds)   │
-│ • New boarding  │                 │
-│ (13 sec total)  │                 │
-└─────────────────┴─────────────────┘
+2. Ground Operations (parallel)
+- Disembar + Restock + New Boarding = 13 sec
+- Refueling = 7 sec
 
 3. Departure Phase
 
