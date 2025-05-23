@@ -51,6 +51,7 @@ System checks for runway availability and gate assignment
 Landing clearance granted when resources are available
 
 2. Ground Operations
+
 ┌─────────────────┬─────────────────┐
 │   Passenger     │    Aircraft     │
 │   Operations    │   Maintenance   │
@@ -60,6 +61,7 @@ Landing clearance granted when resources are available
 │ • New boarding  │                 │
 │ (13 sec total)  │                 │
 └─────────────────┴─────────────────┘
+
 3. Departure Phase
 
 Aircraft request takeoff clearance
