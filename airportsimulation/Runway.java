@@ -8,27 +8,19 @@ package airportsimulation;
  *
  * @author GoatKy1e
  */
+import java.util.concurrent.locks.*;
 public class Runway {
-    private boolean isFree = true;
+    private final ReentrantLock lock = new ReentrantLock();
 
-    public synchronized void acquire() {
-        while (!isFree) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
-        }
-        isFree = false;
+    public void acquire() {
+        lock.lock();  // blocks until the lock is acquired
     }
 
-    public synchronized void release() {
-        isFree = true;
-        notifyAll();
+    public void release() {
+        lock.unlock();  // releases the lock
     }
 
-    public synchronized boolean isFree() {
-        return isFree;
+    public boolean isFree() {
+        return !lock.isLocked();
     }
 }

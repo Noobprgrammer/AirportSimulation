@@ -8,19 +8,32 @@ package airportsimulation;
  *
  * @author GoatKy1e
  */
+import java.util.concurrent.locks.*;
 
 public class RefuelingTruck {
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Condition available = lock.newCondition();
     private boolean isAvailable = true;
 
-    public synchronized void acquire() throws InterruptedException {
-        while (!isAvailable) {
-            wait();
+    public void acquire() throws InterruptedException {
+        lock.lock();
+        try {
+            while (!isAvailable) {
+                available.await();  // wait until it's available
+            }
+            isAvailable = false;
+        } finally {
+            lock.unlock();
         }
-        isAvailable = false;
     }
 
-    public synchronized void release() {
-        isAvailable = true;
-        notifyAll();
+    public void release() {
+        lock.lock();
+        try {
+            isAvailable = true;
+            available.signal();  // wake up one waiting thread
+        } finally {
+            lock.unlock();
+        }
     }
 }
